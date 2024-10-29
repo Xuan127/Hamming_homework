@@ -1,7 +1,7 @@
 import os, requests
 
 # Define the API endpoint and authorization token
-call_id = 'cm2ttm37h00gg95527ys7j2ig'
+call_id = 'cm2tvwpec00kaq68au8liuba4'
 url = f"https://app.hamming.ai/api/media/exercise?id={call_id}"
 api_token = os.environ['HAMMING_API']
 

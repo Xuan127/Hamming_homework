@@ -14,7 +14,10 @@ headers = {
 # Define the request payload
 data = {
     "phone_number": number_to_call,  # Replace with the actual phone number
-    "prompt": "Say hi.",    # Replace with the desired system prompt
+    "prompt": "You are a customer calling an AI agent. \
+        Your goal is to explore all possible conversation paths the agent can handle. \
+        Respond appropriately to the agent's questions, providing different answers each time to navigate new paths. \
+        Keep track of the options you've already explored and aim to cover all services, appointment times, and customer types.",
     "webhook_url": url   # Replace with your webhook URL
 }
 

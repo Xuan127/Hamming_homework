@@ -1,7 +1,7 @@
 import os, requests, json
 
 # Define DeepGram API URL and authorization token
-url = "https://api.deepgram.com/v1/listen?diarize=true&punctuate=true&utterances=true&model=nova-2&smart_format=true"
+url = "https://api.deepgram.com/v1/listen?multichannel=true&punctuate=true&utterances=true&model=nova-2&smart_format=true"
 api_key = os.environ['DEEPGRAM_API']
 audio_file_path = "call_recording.wav"
 save_as_txt = True
@@ -27,9 +27,9 @@ if response.status_code == 200:
     if save_as_txt:
         with open("transcription_output.txt", "w") as txt_file:
             for utterance in utterances:
-                speaker = utterance.get("speaker", "Unknown")
+                channel = utterance.get("channel", "Unknown")
                 transcript = utterance.get("transcript", "")
-                txt_file.write(f"[Speaker: {speaker}] {transcript}\n")
+                txt_file.write(f"[Speaker {channel}] {transcript}\n")
 
         print("Transcription with speaker diarization saved to 'transcription_output.txt'")
 
