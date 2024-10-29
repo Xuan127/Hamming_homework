@@ -106,3 +106,31 @@ def transcribe_audio(api_key, audio_file_path, save_as_txt=True, save_as_json=Tr
         print("Failed to transcribe audio:", response.status_code, response.text)
 
     return response
+
+
+def call_gemini(api_key, prompt):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": prompt
+                    }
+                ]
+            }
+        ]
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()  # Raise an exception for bad status codes
+    except requests.exceptions.RequestException as e:
+        print(f"Error making API request: {e}")
+    
+    return response

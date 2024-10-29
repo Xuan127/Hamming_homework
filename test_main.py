@@ -12,7 +12,7 @@ call_id = response.json()["id"]
 
 audio_available = False
 while not audio_available:
-    time.sleep(5)
+    time.sleep(20)
     print("Waiting for the audio to be available...")
     response = retrieve_audio(HAMMING_API_KEY, call_id)
     if response.status_code == 200:
