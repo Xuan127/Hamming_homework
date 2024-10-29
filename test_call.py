@@ -1,8 +1,9 @@
-import requests
+import os, requests
 
 # Define the API endpoint and authorization token
 url = "https://app.hamming.ai/api/rest/exercise/start-call"
-api_token = "<api_token>"  # Replace with your actual API token
+api_token = os.environ['HAMMING_API']
+number_to_call = os.environ['NUMBER_TO_CALL']
 
 # Set up the request headers with authorization
 headers = {
@@ -12,9 +13,9 @@ headers = {
 
 # Define the request payload
 data = {
-    "phone_number": "<Number to call>",  # Replace with the actual phone number
-    "prompt": "<Agent System Prompt>",    # Replace with the desired system prompt
-    "webhook_url": "<Your Webhook URL>"   # Replace with your webhook URL
+    "phone_number": number_to_call,  # Replace with the actual phone number
+    "prompt": "Say hi.",    # Replace with the desired system prompt
+    "webhook_url": url   # Replace with your webhook URL
 }
 
 # Send the POST request
