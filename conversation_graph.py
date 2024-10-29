@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from helper_structs import ConversationState
 
 class ConversationGraph:
     def __init__(self):
@@ -55,10 +56,11 @@ class ConversationGraph:
         conditions = nx.get_edge_attributes(self.graph, 'condition')
     
         # Draw nodes with different shapes based on state
-        question_nodes = [node for node, attr in states.items() if attr == 'question' or attr == 'clarification' or attr == 'confirmation']
-        action_nodes = [node for node, attr in states.items() if attr == 'action']
-        end_nodes = [node for node, attr in states.items() if attr == 'end' or attr == 'escalation']
-        information_nodes = [node for node, attr in states.items() if attr == 'information']
+        question_nodes = [node for node, attr in states.items() if attr == ConversationState.QUESTION or attr == ConversationState.ACTION_REQUEST \
+                          or attr == ConversationState.CLARIFICATION or attr == ConversationState.CONFIRMATION]
+        action_nodes = [node for node, attr in states.items() if attr == ConversationState.ACTION]
+        end_nodes = [node for node, attr in states.items() if attr == ConversationState.END or attr == ConversationState.ESCALATION]
+        information_nodes = [node for node, attr in states.items() if attr == ConversationState.INFORMATION]
     
         # Draw question nodes as rectangles
         nx.draw_networkx_nodes(self.graph, pos, 
@@ -105,8 +107,8 @@ class ConversationGraph:
 
 if __name__ == "__main__":
     graph = ConversationGraph()
-    graph.add_node("start", "question")
-    graph.add_node_with_edge("start", "middle", "action", "condition")
-    graph.add_node_with_edge("middle", "end", "end", "condition")
-    graph.add_node_with_edge("end", "another end", "information", "condition")
+    graph.add_node("start", ConversationState.QUESTION)
+    graph.add_node_with_edge("start", "middle", ConversationState.ACTION, "condition")
+    graph.add_node_with_edge("middle", "end", ConversationState.END, "condition")
+    graph.add_node_with_edge("end", "another end", ConversationState.INFORMATION, "condition")
     graph.visualize_graph()
