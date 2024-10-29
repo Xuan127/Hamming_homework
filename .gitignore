@@ -1,3 +1,5 @@
 .env
 *.wav
 transcription_output.txt
+transcription_output_no_words.json
+transcription_output.json
