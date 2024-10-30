@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, time
 
 def agent_call(api_token, number_to_call, prompt):
     # Define the API endpoint and authorization token
@@ -134,3 +134,18 @@ def call_gemini(api_key, prompt):
         print(f"Error making API request: {e}")
     
     return response
+
+def call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_call, initial_prompt):
+    response = agent_call(hamming_api_key, number_to_call, initial_prompt)
+    call_id = response.json()["id"]
+
+    time.sleep(30)
+    audio_available = False
+    while not audio_available:
+        time.sleep(10)
+        print("Waiting for the audio to be available...")
+        response = retrieve_audio(hamming_api_key, call_id)
+        if response.status_code == 200:
+            audio_available = True
+
+    transcribe_audio(deepgram_api_key, "call_recording.wav")

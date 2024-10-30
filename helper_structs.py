@@ -9,6 +9,7 @@ class ConversationState(Enum):
     CLARIFICATION = "clarification"
     CONFIRMATION = "confirmation"
     ACTION_REQUEST = "action_request"
+    FILLER = "filler"
     
 class Discovery(TypedDict):
     state: ConversationState
