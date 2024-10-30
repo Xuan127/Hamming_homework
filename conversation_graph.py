@@ -6,6 +6,8 @@ class ConversationGraph:
     def __init__(self):
         # Initialize a directed graph
         self.graph = nx.DiGraph()
+        self.add_node('start', '')
+        self.information_database = []
 
     def add_node(self, node_id, state, history=[]):
         if not self.graph.has_node(node_id):
@@ -19,8 +21,8 @@ class ConversationGraph:
         else:
             raise ValueError("Both nodes must exist in the graph before adding an edge.")
 
-    def add_node_with_edge(self, from_node, to_node, to_state, condition):
-        self.add_node(to_node, to_state)
+    def add_node_with_edge(self, from_node, to_node, to_state, condition, history=[]):
+        self.add_node(to_node, to_state, history)
         self.add_edge(from_node, to_node, condition)
         
     def get_next_state(self, current_node, condition):
@@ -59,7 +61,7 @@ class ConversationGraph:
         question_nodes = [node for node, attr in states.items() if attr == ConversationState.QUESTION or attr == ConversationState.ACTION_REQUEST \
                           or attr == ConversationState.CLARIFICATION or attr == ConversationState.CONFIRMATION]
         action_nodes = [node for node, attr in states.items() if attr == ConversationState.ACTION]
-        end_nodes = [node for node, attr in states.items() if attr == ConversationState.END or attr == ConversationState.ESCALATION]
+        end_nodes = [node for node, attr in states.items() if attr == ConversationState.END]
         information_nodes = [node for node, attr in states.items() if attr == ConversationState.INFORMATION]
     
         # Draw question nodes as rectangles

@@ -106,7 +106,7 @@ def identify_speaker(api_key: str, model_name: str, transcript: str) -> str:
 
     return business_speaker
 
-def generate_question_response(api_key: str, model_name: str, question: str, information_database: list[str]) -> str:
+def generate_question_response(api_key: str, model_name: str, question: str, information_database: list[str] = []) -> str:
     time.sleep(5)
     gemini.configure(api_key=api_key)
 
@@ -117,17 +117,21 @@ def generate_question_response(api_key: str, model_name: str, question: str, inf
 
     Examples:
     - If they ask if you are the customer, output a list of responses including "yes, I am the customer", "no, I am not the customer"
-    - If they ask if you are calling about an appointment, output a list of responses including "yes, I am calling about an appointment", "no, I am not calling about an appointment", "I am calling about a service", "I am calling about a product"
-    - If they ask if you are calling about a service, output a list of responses including "yes, I am calling about a service", "no, I am not calling about a service", "I am calling about a product", "I am calling about an appointment"
+    - If they ask if you are calling about an appointment, output a list of responses including "yes, I am calling about an appointment", "no, I am not calling about an appointment"
+    - If they ask if you are calling about a service, output a list of responses including "yes, I am calling about a service", "no, I am not calling about a service"
 
     Example output:
     [
         "question": "The agent asks if you are calling about an appointment.", "response": "yes, I am calling about an appointment",
-        "question": "The agent asks if you are calling about an appointment.", "response": "no, I am not calling about an appointment",
+        "question": "The agent asks if you are calling about an appointment.", "response": "no, I am not calling about an appointment","
     ]
     [
         question: "The agent asks if the caller is an existing customer", response: "yes, I am an existing customer",
         question: "The agent asks if the caller is an existing customer", response: "no, I am not an existing customer",
+    ]
+    [
+        question: "The agent asks if the caller is calling about a service", response: "yes, I am calling about a service",
+        question: "The agent asks if the caller is calling about a service", response: "no, I am not calling about a service",
     ]
     """
    
@@ -137,6 +141,25 @@ def generate_question_response(api_key: str, model_name: str, question: str, inf
             response_mime_type="application/json",
             response_schema=list[QuestionResponse]))
     return response.text.strip()
+
+def check_in_history(api_key: str, model_name: str, history: list[str], question: str) -> bool:
+    time.sleep(5)
+    gemini.configure(api_key=api_key)
+    model = gemini.GenerativeModel(model_name,
+        system_instruction="""
+        You are checking if a question has been asked before in a conversation history.
+        Return 'true' if the question is found in the history, 'false' otherwise.
+        Compare the semantic meaning, not just exact matches.
+        """)
+    
+    response = model.generate_content(
+        f"Question: {question}\nHistory: {history}", 
+        safety_settings=safety_settings,
+        generation_config=gemini.GenerationConfig(
+            response_mime_type="application/json",
+            response_schema=bool))
+    
+    return response.text.strip().lower() == "true"
 
 if __name__ == "__main__":
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')

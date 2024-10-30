@@ -29,6 +29,7 @@ def generate_initial_prompt(api_key: str, model_name: str, business_description:
         3. Include how to handle unexpected responses or system failures
         4. Specify a natural, conversational tone that mimics real customer calls
         5. You can give make up names and numbers, but nothing that is illegal or immoral
+        6. Ask for the products and services that the business offers
 
         Format the response as a clear, structured system prompt that can be used directly with an AI model.
         """

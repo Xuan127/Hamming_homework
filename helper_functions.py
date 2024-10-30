@@ -1,4 +1,8 @@
-import requests, json, time
+import requests, json, time, os
+from conversation_graph import ConversationGraph
+from helper_structs import ConversationState
+from llm_functions import determine_state, identify_speaker, generate_question_response, check_in_history
+from llm_parsers import parse_information, parse_question, parse_action
 
 def agent_call(api_token, number_to_call, prompt):
     # Define the API endpoint and authorization token
@@ -149,3 +153,83 @@ def call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_cal
             audio_available = True
 
     transcribe_audio(deepgram_api_key, "call_recording.wav")
+
+def call_per_node(hamming_api_key, deepgram_api_key, gemini_api_key, gemini_model, number_to_call, prompt, graph, node, condition, call_stacks):
+    # call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_call, prompt)
+
+    # Read the transcription output
+    with open("transcription_output.txt", "r") as f:
+        transcript = f.read()
+
+    business_speaker = identify_speaker(gemini_api_key, gemini_model, transcript)
+
+    print(f"\nIdentified business AI agent as Speaker {business_speaker}")
+
+    # Print all responses from the business AI agent
+    print("\nBusiness AI Agent responses:")
+    with open("transcription_output.txt", "r") as f:
+        lines = f.readlines()
+
+    questions_database = []
+    actions_database = []
+
+    for line in lines:
+        if f"[Speaker {business_speaker}]" in line:
+            # Extract just the text after the speaker tag
+            response = line.split(f"[Speaker {business_speaker}]")[1].strip()
+            print(f"- {response}")
+            states = determine_state(gemini_api_key, gemini_model, response)
+            print(f"States: {states}\n")
+            states = json.loads(states)
+            for state in states:
+                if state['state'] == 'information':
+                    parsed_info = parse_information(gemini_api_key, gemini_model, state['text'], graph.information_database)
+                    if parsed_info != "DUPLICATE":
+                        graph.information_database.append(parsed_info)    
+                elif state['state'] == 'question' or state['state'] == 'action_request':
+                    parsed_question = parse_question(gemini_api_key, gemini_model, state['text'], questions_database)
+                    if parsed_question != "DUPLICATE":
+                        questions_database.append(parsed_question)
+                elif state['state'] == 'action':
+                    parsed_action = parse_action(gemini_api_key, gemini_model, state['text'], actions_database)
+                    if parsed_action != "DUPLICATE":
+                        actions_database.append(parsed_action)
+
+    print(f"Information Database: {graph.information_database}")
+    print(f"Questions Database: {questions_database}")
+    print(f"Actions Database: {actions_database}")
+
+    history = list(graph.get_history(node))
+    history.append({'question': node, 'response': condition})
+
+    list_of_responses = []
+    for question in questions_database:
+        if not check_in_history(gemini_api_key, gemini_model, history, question):
+            list_of_responses = generate_question_response(gemini_api_key, gemini_model, question, graph.information_database)
+            list_of_responses = json.loads(list_of_responses)
+            break
+
+    if len(list_of_responses) > 0:
+        graph.add_node_with_edge(node, list_of_responses[0]['question'], ConversationState.QUESTION, '', history)
+        for response in list_of_responses:
+            new_response = {'question': response['question'], 'response': response['response']}
+            call_stacks.append(new_response)
+    elif len(actions_database) > 0:
+        graph.add_node_with_edge(node, actions_database[0], ConversationState.ACTION, '', history)
+
+    graph.visualize_graph()
+
+if __name__ == "__main__":
+    hamming_api_key = os.getenv("HAMMING_API_KEY")
+    deepgram_api_key = os.getenv("DEEPGRAM_API_KEY")
+    number_to_call = os.getenv("NUMBER_TO_CALL")
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    gemini_model = "gemini-1.5-flash"
+    graph = ConversationGraph()
+    node = "start"
+    call_stacks = []
+    prompt = """You are a caller testing the business's AI system. 
+        Say that you are an existing customer and ask for information about the business. 
+        Say that you name is John Doe and your address is 123 Main Street.
+        Say that your aircon broke down and you need help."""
+    call_per_node(hamming_api_key, deepgram_api_key, gemini_api_key, gemini_model, number_to_call, prompt, graph, node, call_stacks)
