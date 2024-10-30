@@ -4,7 +4,7 @@ from helper_structs import Discovery
 from llm_functions import safety_settings
 
 def parse_information(api_key: str, model_name: str, text: str, information_database: list[str]) -> str:
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(model_name,
@@ -30,7 +30,7 @@ def parse_information(api_key: str, model_name: str, text: str, information_data
 
 
 def parse_question(api_key: str, model_name: str, text: str, question_database: list[str]) -> str:
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(model_name,
@@ -57,7 +57,7 @@ def parse_question(api_key: str, model_name: str, text: str, question_database: 
 
 
 def parse_action(api_key: str, model_name: str, text: str, action_database: list[str]) -> str:
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(model_name,
@@ -81,7 +81,7 @@ def parse_action(api_key: str, model_name: str, text: str, action_database: list
     return response.text.strip()
 
 def parse_conversation(api_key: str, model_name: str, text: str, history: list[str] = []) -> str:
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(model_name,

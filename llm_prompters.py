@@ -1,4 +1,4 @@
-import time
+import time, os
 import google.generativeai as gemini
 from llm_functions import safety_settings
 
@@ -46,8 +46,7 @@ def generate_initial_prompt(api_key: str, model_name: str, business_description:
     response = model.generate_content(prompt_template)
     return response.text.strip()
 
-def generate_next_prompt_question(api_key: str, model_name: str, text: str, question_database: list[str], business_description: str) -> str:
-    time.sleep(5)
+def generate_next_prompt(api_key: str, model_name: str, business_description: str, question: str, response: str, history: list[str]) -> str:
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(model_name,
@@ -58,22 +57,27 @@ def generate_next_prompt_question(api_key: str, model_name: str, text: str, ques
             conversation paths and scenarios. The prompt should:
 
             1. Define the agent's role as a caller testing the business's AI system
-            2. Specify various test scenarios to try
+            2. Specify a specific scenario to try, which is given in the form of a question and the response that the tester AI should give
             3. Include how to handle unexpected responses or system failures
             4. Specify a natural, conversational tone that mimics real customer calls
             5. You can give make up names and numbers, but nothing that is illegal or immoral
 
             Format the response as a clear, structured system prompt that can be used directly with an AI model.
-            Your task is to specially explore the question or action request that the business AI agent asked.
-            If it provides multiple options, explore one of the options. You can also explore options that are not provided.
-            You can also explore the information database to provide more information to the business AI agent.
+            The tester agent's task is to specially explore the question that the business AI agent asked.
+            Use the response to guide the tester agent's exploration, the tester agent should use the response to determine what to say next.
 
-            Question database: {question_database}
+            The history of the conversation is given below: {history}
+            The tester agent should use the history to determine what to say next.
             """)
-    text = f"The business description is: {business_description}, the question is: {text}"
-    response = model.generate_content(text, safety_settings=safety_settings, 
-        generation_config=gemini.GenerationConfig(
-            response_mime_type="application/json",
-            response_schema=list[str]))
+    text = f"The business description is: {business_description}, the question is: {question}, the response is: {response}"
+    response = model.generate_content(text, safety_settings=safety_settings)
     
     return response.text.strip()
+
+if __name__ == "__main__":
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    GEMINI_MODEL = 'gemini-1.5-flash'
+    business_description = "A business that sells and services aircon units"
+    question = 'The business will ask if the caller is an existing customer.'
+    response = 'yes, I am an existing customer'
+    print(generate_next_prompt(GEMINI_API_KEY, GEMINI_MODEL, business_description, question, response))

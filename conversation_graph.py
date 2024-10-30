@@ -122,7 +122,7 @@ class ConversationGraph:
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=conditions, font_color='red', font_size=7)
         
         plt.axis('off')
-        plt.show()
+        plt.savefig('conversation_graph.png')
 
 if __name__ == "__main__":
     graph = ConversationGraph()

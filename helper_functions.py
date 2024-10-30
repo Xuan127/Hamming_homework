@@ -155,7 +155,7 @@ def call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_cal
     transcribe_audio(deepgram_api_key, "call_recording.wav")
 
 def call_per_node(hamming_api_key, deepgram_api_key, gemini_api_key, gemini_model, number_to_call, prompt, graph, node, condition, call_stacks):
-    # call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_call, prompt)
+    call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_call, prompt)
 
     # Read the transcription output
     with open("transcription_output.txt", "r") as f:
@@ -218,7 +218,7 @@ def call_per_node(hamming_api_key, deepgram_api_key, gemini_api_key, gemini_mode
         for action in actions_database:
             graph.add_node_with_edge(node, action, ConversationState.ACTION, condition, history)
 
-    graph.visualize_graph()
+    # graph.visualize_graph()
 
 if __name__ == "__main__":
     hamming_api_key = os.getenv("HAMMING_API_KEY")

@@ -20,7 +20,7 @@ def determine_state(api_key: str, model_name: str, sentence: str) -> str:
     Returns:
         str: The determined state ('question', 'action', or 'end')
     """
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(
@@ -41,17 +41,22 @@ def determine_state(api_key: str, model_name: str, sentence: str) -> str:
         The text should be the most relevant part of the conversation that is relevant to the conversation state.
         You can return multiple sentences if they are all relevant to the conversation state.
         You can return multiple states if the text contains multiple conversation states.
+        If the sentence is incomplete, return "filler".
 
         Examples of filler words or phrases:
         - "thank you", "okay", "that's great", "I understand", "I'm sorry", "I apologize", "hello", "hi", "how are you", "I see"
         - "this is XXX speaking"
         - "free to reach out anytime", "It was nice talking to you", "have a great day"
-        - "How can I help you today?"
+        - "How can I help you today?", "I can help with that", "I'm sorry, but I don't have access to that information"
+        - "Is that correct?", "Do you confirm that you want to proceed?"
+        - "thank you for confirming"
 
         Examples of action statements:
         - "I will schedule an appointment for you"
         - "I am going to call you back"
         - "Our agent will call you back"
+        - "We will schedule a technician to come out"
+        - "We will schedule a service visit for you, is that okay?"
 
         Examples of action requests:
         - "Can you send me a text with the address?"
@@ -72,6 +77,7 @@ def determine_state(api_key: str, model_name: str, sentence: str) -> str:
         Examples of confirmation:
         - "Is that correct?"
         - "Do you confirm that you want to proceed?"
+        - "can we proceed?"
 
         Examples of end:
         - "Thank you for calling. Goodbye!"
@@ -112,7 +118,7 @@ def identify_speaker(api_key: str, model_name: str, transcript: str) -> str:
     return business_speaker
 
 def generate_question_response(api_key: str, model_name: str, question: str, information_database: list[str] = []) -> str:
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
 
     system_prompt = f"""
@@ -148,7 +154,7 @@ def generate_question_response(api_key: str, model_name: str, question: str, inf
     return response.text.strip()
 
 def check_in_history(api_key: str, model_name: str, history: list[str], question: str) -> bool:
-    time.sleep(5)
+    time.sleep(3)
     gemini.configure(api_key=api_key)
     model = gemini.GenerativeModel(model_name,
         system_instruction="""
