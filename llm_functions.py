@@ -36,6 +36,7 @@ def determine_state(api_key: str, model_name: str, sentence: str) -> str:
         - 'confirmation': If the text is confirming or seeking confirmation
         - 'action_request': If the text is specifically requesting an action be taken
         - 'filler': If the text is filler words or phrases that are not important to the conversation
+        - 'transfer': If the text is indicating that the conversation should be transferred to another agent
         You should also return the text that is relevant to the conversation state.
         The text should be the most relevant part of the conversation that is relevant to the conversation state.
         You can return multiple sentences if they are all relevant to the conversation state.
@@ -75,6 +76,10 @@ def determine_state(api_key: str, model_name: str, sentence: str) -> str:
         Examples of end:
         - "Thank you for calling. Goodbye!"
         - "I hope that helps. Goodbye!"
+
+        Examples of transfer:
+        - "I am transferring you to another agent."
+        - "Please talk to the other department."
         """
     )
 

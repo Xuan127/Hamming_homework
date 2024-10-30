@@ -190,7 +190,7 @@ def call_per_node(hamming_api_key, deepgram_api_key, gemini_api_key, gemini_mode
                     parsed_question = parse_question(gemini_api_key, gemini_model, state['text'], questions_database)
                     if parsed_question != "DUPLICATE":
                         questions_database.append(parsed_question)
-                elif state['state'] == 'action':
+                elif state['state'] == 'action' or state['state'] == 'transfer':
                     parsed_action = parse_action(gemini_api_key, gemini_model, state['text'], actions_database)
                     if parsed_action != "DUPLICATE":
                         actions_database.append(parsed_action)
@@ -210,12 +210,13 @@ def call_per_node(hamming_api_key, deepgram_api_key, gemini_api_key, gemini_mode
             break
 
     if len(list_of_responses) > 0:
-        graph.add_node_with_edge(node, list_of_responses[0]['question'], ConversationState.QUESTION, '', history)
+        graph.add_node_with_edge(node, list_of_responses[0]['question'], ConversationState.QUESTION, condition, history)
         for response in list_of_responses:
             new_response = {'question': response['question'], 'response': response['response']}
             call_stacks.append(new_response)
     elif len(actions_database) > 0:
-        graph.add_node_with_edge(node, actions_database[0], ConversationState.ACTION, '', history)
+        for action in actions_database:
+            graph.add_node_with_edge(node, action, ConversationState.ACTION, condition, history)
 
     graph.visualize_graph()
 
