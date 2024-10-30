@@ -67,11 +67,6 @@ def generate_next_prompt_question(api_key: str, model_name: str, text: str, ques
             If it provides multiple options, explore one of the options. You can also explore options that are not provided.
             You can also explore the information database to provide more information to the business AI agent.
 
-            Examples:
-            - If they ask if you are the customer, output a list of responses including "yes, I am the customer", "no, I am not the customer"
-            - If they ask if you are calling about an appointment, output a list of responses including "yes, I am calling about an appointment", "no, I am not calling about an appointment", "I am calling about a service", "I am calling about a product"
-            - If they ask if you are calling about a service, output a list of responses including "yes, I am calling about a service", "no, I am not calling about a service", "I am calling about a product", "I am calling about an appointment"
-
             Question database: {question_database}
             """)
     text = f"The business description is: {business_description}, the question is: {text}"

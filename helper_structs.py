@@ -14,3 +14,7 @@ class ConversationState(Enum):
 class Discovery(TypedDict):
     state: ConversationState
     text: str
+
+class QuestionResponse(TypedDict):
+    question: str
+    response: str

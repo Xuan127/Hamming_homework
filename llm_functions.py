@@ -1,6 +1,6 @@
 import os, time
 import google.generativeai as gemini
-from helper_structs import Discovery
+from helper_structs import Discovery, QuestionResponse
 
 safety_settings={
         gemini.types.HarmCategory.HARM_CATEGORY_HATE_SPEECH: gemini.types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
@@ -106,12 +106,50 @@ def identify_speaker(api_key: str, model_name: str, transcript: str) -> str:
 
     return business_speaker
 
+def generate_question_response(api_key: str, model_name: str, question: str, information_database: list[str]) -> str:
+    time.sleep(5)
+    gemini.configure(api_key=api_key)
+
+    system_prompt = f"""
+    You are given a question that a business AI agent asked a customer. Your job is to generate a list of possible responses in JSON format.
+    The JSON should have two keys: "question" and "response".
+    You can make use of existing in formation in {information_database} to generate a response.
+
+    Examples:
+    - If they ask if you are the customer, output a list of responses including "yes, I am the customer", "no, I am not the customer"
+    - If they ask if you are calling about an appointment, output a list of responses including "yes, I am calling about an appointment", "no, I am not calling about an appointment", "I am calling about a service", "I am calling about a product"
+    - If they ask if you are calling about a service, output a list of responses including "yes, I am calling about a service", "no, I am not calling about a service", "I am calling about a product", "I am calling about an appointment"
+
+    Example output:
+    [
+        "question": "The agent asks if you are calling about an appointment.", "response": "yes, I am calling about an appointment",
+        "question": "The agent asks if you are calling about an appointment.", "response": "no, I am not calling about an appointment",
+    ]
+    [
+        question: "The agent asks if the caller is an existing customer", response: "yes, I am an existing customer",
+        question: "The agent asks if the caller is an existing customer", response: "no, I am not an existing customer",
+    ]
+    """
+   
+    model = gemini.GenerativeModel(model_name, system_instruction=system_prompt)
+    response = model.generate_content("the question is: " + question, safety_settings=safety_settings,
+        generation_config=gemini.GenerationConfig(
+            response_mime_type="application/json",
+            response_schema=list[QuestionResponse]))
+    return response.text.strip()
 
 if __name__ == "__main__":
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     GEMINI_MODEL = "gemini-1.5-flash"
 
-    print(determine_state(GEMINI_API_KEY, GEMINI_MODEL, 
-        """Thank you, Alex. I understand you're just gathering information. 
-        We typically accept major credit cards, checks, and cash. 
-        If you have any other questions or need further assistance, feel free to ask."""))
+    # print(determine_state(GEMINI_API_KEY, GEMINI_MODEL, 
+    #     """Thank you, Alex. I understand you're just gathering information. 
+    #     We typically accept major credit cards, checks, and cash. 
+    #     If you have any other questions or need further assistance, feel free to ask."""))
+
+    print(generate_question_response(GEMINI_API_KEY, GEMINI_MODEL, 
+        "The agent asks if you are calling about an appointment.", 
+        ["The business is open from 9am to 5pm, Monday to Friday."]))
+    print(generate_question_response(GEMINI_API_KEY, GEMINI_MODEL, 
+        "The agent asks if you are calling about a service.", 
+        ["The business is open from 9am to 5pm, Monday to Friday."]))
