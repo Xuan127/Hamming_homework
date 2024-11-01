@@ -1,0 +1,9 @@
+[Speaker 0] Hello. Thank you for calling Anthem Air Conditioning and Plumbing. This is Olivia speaking. Are you an existing customer with us?
+[Speaker 1] Yes. I am an existing customer.
+[Speaker 0] Great. Is this an emergency situation?
+[Speaker 1] No. It's not an emergency.
+[Speaker 1] I just wanted to inquire about getting my air conditioner serviced.
+[Speaker 0] Alright.
+[Speaker 0] I can help with that. An agent will call you back to assist with your air conditioner service. Goodbye.
+[Speaker 1] Thank you.
+[Speaker 1] Goodbye.

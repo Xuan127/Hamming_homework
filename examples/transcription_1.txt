@@ -1,0 +1,40 @@
+[Speaker 0] Hello. Thank you for calling Anthem Air Conditioning and Plumbing. This is Olivia speaking. Are you an existing customer with us?
+[Speaker 1] Hello. This is not Olivia, but I'm here to help you with any questions you might have about our air conditioning services.
+[Speaker 1] How?
+[Speaker 0] I
+[Speaker 0] I
+[Speaker 1] No problem at all.
+[Speaker 0] hello.
+[Speaker 0] Are you an existing
+[Speaker 1] How can I assist you with your air
+[Speaker 1] Hello? I'm here to help with any questions you have about our air conditioning services.
+[Speaker 1] Are you looking for information on our products or services?
+[Speaker 0] Are you
+[Speaker 0] I apologize for any confusion. Are you an existing customer with us?
+[Speaker 1] No. I'm not an existing customer.
+[Speaker 1] I'm calling to inquire about your air conditioning services.
+[Speaker 0] Great.
+[Speaker 0] Great. Could I plea
+[Speaker 1] Could you tell me more about what you offer?
+[Speaker 0] Of course. But first, could I please have your name and physical address?
+[Speaker 1] Certainly.
+[Speaker 1] My name is Alex, and I'm currently just gathering information, so I don't have a specific address to provide at the moment.
+[Speaker 1] Could you tell me about the types of air conditioning units you offer?
+[Speaker 0] No problem
+[Speaker 0] I can certainly have an agent provide you with detailed information about our air conditioning units. Is there anything else I can assist you with today?
+[Speaker 1] Yes. I'd also like to know about the pricing range for a typical installation and if you offer maintenance services.
+[Speaker 1] Could you provide some details on that?
+[Speaker 0] I understand.
+[Speaker 0] I can have an agent provide you with detailed information about pricing and maintenance services.
+[Speaker 0] Is there anything else I can assist you with today?
+[Speaker 1] That sounds great.
+[Speaker 0] Thank you, Alex.
+[Speaker 1] Could you also let me know if you have any current promotions or discounts available?
+[Speaker 0] I can have an agent provide you with information about any current promotions or discounts.
+[Speaker 0] Is there anything else I can assist you with today?
+[Speaker 1] That's all for now.
+[Speaker 1] Thank you for your help.
+[Speaker 0] Thank you, Alec.
+[Speaker 1] I'll wait to hear from an agent for more details.
+[Speaker 0] Goodbye.
+[Speaker 1] Have a great day.

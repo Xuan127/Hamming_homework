@@ -1,8 +1,8 @@
 import json
 import os
-from helper_functions import call_per_node
-from llm_prompters import generate_initial_prompt, generate_next_prompt
-from conversation_graph import ConversationGraph
+from deprecated.helper_functions import call_per_node
+from deprecated.llm_prompters import generate_initial_prompt, generate_next_prompt
+from deprecated.conversation_graph import ConversationGraph
 
 HAMMING_API_KEY = os.environ['HAMMING_API_KEY']
 DEEPGRAM_API_KEY = os.environ['DEEPGRAM_API_KEY']

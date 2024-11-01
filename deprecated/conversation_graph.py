@@ -1,6 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from helper_structs import ConversationState
+from deprecated.helper_structs import ConversationState
 
 class ConversationGraph:
     def __init__(self):

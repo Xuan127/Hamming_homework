@@ -1,6 +1,6 @@
 import os, time
 import google.generativeai as gemini
-from helper_structs import Discovery, QuestionResponse
+from deprecated.helper_structs import Discovery
 
 safety_settings={
         gemini.types.HarmCategory.HARM_CATEGORY_HATE_SPEECH: gemini.types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
@@ -20,7 +20,7 @@ def determine_state(api_key: str, model_name: str, sentence: str) -> str:
     Returns:
         str: The determined state ('question', 'action', or 'end')
     """
-    time.sleep(3)
+    time.sleep(4)
     gemini.configure(api_key=api_key)
 
     model = gemini.GenerativeModel(
@@ -118,7 +118,7 @@ def identify_speaker(api_key: str, model_name: str, transcript: str) -> str:
     return business_speaker
 
 def generate_question_response(api_key: str, model_name: str, question: str, information_database: list[str] = []) -> str:
-    time.sleep(3)
+    time.sleep(4)
     gemini.configure(api_key=api_key)
 
     system_prompt = f"""
@@ -154,7 +154,7 @@ def generate_question_response(api_key: str, model_name: str, question: str, inf
     return response.text.strip()
 
 def check_in_history(api_key: str, model_name: str, history: list[str], question: str) -> bool:
-    time.sleep(3)
+    time.sleep(4)
     gemini.configure(api_key=api_key)
     model = gemini.GenerativeModel(model_name,
         system_instruction="""
