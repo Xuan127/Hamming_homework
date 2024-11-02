@@ -1,15 +1,22 @@
 from streamlit_agraph import agraph, Node, Edge, Config
 from pydantic import BaseModel
+from enum import Enum
+from typing import Optional
+
+class DecisionNodeTypes(Enum):
+    QUESTION = "question"
+    ACTION = "action"
+    INQUIRY = "inquiry"
 
 class DecisionNode(BaseModel):
     id: str
+    type: DecisionNodeTypes
     label: str
-    is_question: bool
 
 class DecisionEdge(BaseModel):
-    source: str
-    target: str
-    label: str
+    source_id: str
+    target_id: str
+    condition: Optional[str]
 
 class DecisionTree:
     def __init__(self):

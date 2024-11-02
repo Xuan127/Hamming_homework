@@ -1,44 +1,53 @@
 import os
-from groq import Groq
+from enum import Enum
 from pydantic import BaseModel
 from typing import Optional
+from openai import OpenAI
 import openai
 
-class Get_BusinessAgent_Question(BaseModel):
+class Role(Enum):
+    CALLER = "caller"
+    CALLEE = "callee"
+
+class Get_Question(BaseModel):
+    asked_by: Role
     question: str
 
-class Get_BusinessAgent_Action(BaseModel):
+class Get_Action(BaseModel):
+    done_by: Role
     action: str
 
-question_tool = openai.pydantic_function_tool(Get_BusinessAgent_Question)
-action_tool = openai.pydantic_function_tool(Get_BusinessAgent_Action)
+question_tool = openai.pydantic_function_tool(Get_Question)
+action_tool = openai.pydantic_function_tool(Get_Action)
 
-question_tool["function"]["description"] = """To get a question asked by the AI business agent."""
-question_tool["function"]['parameters']['properties']['question']['description'] = "The question asked by the AI business agent."
-action_tool["function"]["description"] = """To get an action taken by the AI business agent."""
-action_tool["function"]['parameters']['properties']['action']['description'] = "The action taken by the AI business agent."
+question_tool["function"]["description"] = """To get a question asked by either the caller or the callee."""
+question_tool["function"]['parameters']['properties']['question']['description'] = "The question asked by either the caller or the callee."
 
-def get_groq_completion(prompt: str) -> str:
+action_tool["function"]["description"] = """To get an action taken by either the caller or the callee."""
+action_tool["function"]['parameters']['properties']['action']['description'] = "The action taken by either the caller or the callee."
+
+def get_openai_completion(prompt: str) -> str:
     """
-    Get a completion from Groq API with error handling
+    Get a completion from OpenAI API with error handling
     
     Args:
-        prompt (str): The prompt to send to Groq
+        prompt (str): The prompt to send to OpenAI
         
     Returns:
-        str: The completion text from Groq
+        str: The completion text from OpenAI
         
     Raises:
-        Exception: If there is an error connecting to Groq API
+        Exception: If there is an error connecting to OpenAI API
     """
 
     system_prompt = """
     Given a conversation between a business AI agent (callee) and a tester AI agent (caller), 
-    you should output a list of questions asked by the callee AI and actions taken by the callee AI.
+    you should output a list of questions asked by actions taken by the callee and caller.
+    First identify who is the callee and who is the caller, then output the questions and actions.
     """
     try:
-        client = Groq(
-            api_key=os.environ.get("GROQ_API_KEY"),
+        client = OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY"),
         )
         chat_completion = client.chat.completions.create(
             messages=[
@@ -51,8 +60,8 @@ def get_groq_completion(prompt: str) -> str:
                     "content": prompt
                 }
             ],
-            model="llama3-groq-8b-8192-tool-use-preview",
-            tools=[action_tool],
+            model="gpt-4o-mini",
+            tools=[question_tool, action_tool],
             tool_choice="auto",
             max_tokens=4096
         )
@@ -60,10 +69,10 @@ def get_groq_completion(prompt: str) -> str:
         return chat_completion.choices[0].message.tool_calls
         
     except Exception as e:
-        raise Exception(f"Error getting Groq completion: {str(e)}")
+        raise Exception(f"Error getting OpenAI completion: {str(e)}")
 
-text = open('examples/transcription_1.txt', 'r').read()
+text = open('examples/transcription_2.txt', 'r').read()
 prompt = """The conversation is"""+text
-nodes = get_groq_completion(prompt)
+nodes = get_openai_completion(prompt)
 for node in nodes:
     print(node.function.arguments)
