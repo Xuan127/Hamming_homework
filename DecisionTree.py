@@ -11,7 +11,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
     handlers=[
-        logging.FileHandler(f'logs/decision_tree_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
+        # logging.FileHandler(f'logs/decision_tree_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
         # logging.StreamHandler()
     ]
 )

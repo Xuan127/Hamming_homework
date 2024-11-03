@@ -23,7 +23,7 @@ while True:
     conversation = open("transcription_output.txt", "r").read()
     text = parse_nodes_and_edges(openai_api_key, "o1-preview", conversation, nodes, edges)
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    with open(f"parsed_text_output_{timestamp}.txt", "w") as f:
+    with open(f"logs/parsed_text_output_{timestamp}.txt", "w") as f:
         f.write(str(text))
     new_nodes = get_nodes(openai_api_key, "gpt-4o", text)
     new_edges = get_edges(openai_api_key, "gpt-4o", text)

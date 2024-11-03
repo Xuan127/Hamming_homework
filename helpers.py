@@ -124,7 +124,7 @@ def transcribe_audio(
 
         if save_as_txt:
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            with open(f"transcription_output_{timestamp}.txt", "w") as txt_file:
+            with open(f"logs/transcription_output_{timestamp}.txt", "w") as txt_file:
                 for utterance in utterances:
                     channel = utterance.get("channel", "Unknown")
                     transcript = utterance.get("transcript", "")
@@ -272,11 +272,12 @@ def prompt_creator(api_key: str, model_name: str, business_description: str, nod
             <prompt requirements>
             The prompt should:
             1. Define the agent's role as a caller testing the business's AI system
-            2. Specify various test scenarios to try (based on the nodes and edges)
-            3. You do not need to repeat the existing scenarios from the nodes and edges, just add more.
-            4. For each decision node, explore different responses that is not explored according to the edges
-            5. The caller agent should not disclose that it is a tester agent, it should not say that it is testing the business's AI system.
-            6. The prompt should be in markdown format.
+            2. Do not ask too many questions, only ask questions that are necessary to explore the conversation paths
+            3. Specify various test scenarios to try (based on the nodes and edges)
+            4. You do not need to repeat the existing scenarios from the nodes and edges, just add more.
+            5. For each decision node, explore different responses that is not explored according to the edges
+            6. The caller agent should not disclose that it is a tester agent, it should not say that it is testing the business's AI system.
+            7. The prompt should be in markdown format.
 
             Format the response as a clear, structured system prompt that can be used directly with an AI model.
             Do not talk to me at all.
@@ -297,7 +298,7 @@ def prompt_creator(api_key: str, model_name: str, business_description: str, nod
         logger.info("Successfully generated system prompt")
         # Save the generated prompt to a file
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        with open(f"system_prompt_{timestamp}.txt", "w") as f:
+        with open(f"logs/system_prompt_{timestamp}.txt", "w") as f:
             f.write(response.choices[0].message.content)
     
         print("prompt created")
