@@ -55,8 +55,7 @@ def parse_nodes_and_edges(api_key: str, model_name: str, conversation: str, node
         We are trying to draw a decision tree for a business AI agent.
         Each node in the decision tree is either a question or an action.
         The decision describes the actions that the callee agent can take and the conditions that lead to different actions.
-        Each inquiry is an inquiry made by the caller, they should not be sequential but should be parallel.
-        Each inquiry should be from the same node.
+        Each inquiry is an inquiry made by the caller, they should not be sequential but should be parallel. As in there should be a common node that connects all the inquiries.
         </context>
 
         <instructions>
@@ -75,7 +74,7 @@ def parse_nodes_and_edges(api_key: str, model_name: str, conversation: str, node
         <description>
         node: To get a node in the decision tree.
         'id' of node = The id of the node. It is just a unique integer.
-        'label' of node = The label of the node.
+        'label' of node = The label of the node. It should be summarised and concise.
         'type' of node = [question: The node is a question asked by the callee agent.
         action: The node is an action done by the callee agent.
         inquiry: The node is an inquiry made by the caller.
@@ -163,7 +162,6 @@ def get_nodes(api_key: str, model_name: str, text: str) -> list[DecisionNode]:
                     "content": """
                     Extract all the nodes from the given text.
                     The nodes should follow the format of {"id": _, "label": _, "type": _}
-                    output none if there are no nodes.
                     """,
                 },
                 {
@@ -172,7 +170,7 @@ def get_nodes(api_key: str, model_name: str, text: str) -> list[DecisionNode]:
                 },
             ],
             tools=[draw_node_tool],
-            tool_choice="auto",
+            tool_choice="required",
         )
 
         result = response.choices[0].message.tool_calls
@@ -215,7 +213,6 @@ def get_edges(api_key: str, model_name: str, text: str) -> list[DecisionEdge]:
                     "content": """
                     Extract all the edges from the given text.
                     The edges should follow the format of {"source_id": _, "target_id": _, "condition": _}
-                    output none if there are no edges.
                     """,
                 },
                 {
@@ -294,39 +291,7 @@ def parse_tree(tree: DecisionTree, nodes: list[DecisionNode], edges: list[Decisi
         return tree
 
 if __name__ == "__main__":
-    try:
-        logger.info("Starting the Decision Tree application.")
-        st.set_page_config(layout="wide")
-        tree = DecisionTree()
-        nodes = []
-        edges = []
-
-        conversation = open("examples/transcription_1.txt", "r").read()
-        logger.info("Parsed conversation from transcription_1.txt")
-
-        text = parse_nodes_and_edges(os.environ.get("OPENAI_API_KEY"), "o1-preview", conversation, nodes, edges)
-        with open("output1.txt", "w") as f:
-            f.write(str(text))
-        logger.info("Wrote parse_nodes_and_edges output to output1.txt")
-
-        new_nodes = get_nodes(os.environ.get("OPENAI_API_KEY"), "gpt-4o", text)
-        new_edges = get_edges(os.environ.get("OPENAI_API_KEY"), "gpt-4o", text)
-        logger.info(f"Extracted new nodes: {new_nodes}")
-        logger.info(f"Extracted new edges: {new_edges}")
-
-        if new_nodes is None:
-            new_nodes = []
-            logger.debug("No new nodes to add.")
-
-        if new_edges is None:
-            new_edges = []
-            logger.debug("No new edges to add.")
-
-        nodes.extend(new_nodes)
-        edges.extend(new_edges)
-        tree = parse_tree(tree, new_nodes, new_edges)
-        tree.display()
-        logger.info("Decision tree displayed successfully.")
-
-    except Exception as e:
-        logger.critical(f"Unhandled exception in main: {e}", exc_info=True)
+    openai_api_key = os.environ.get("OPENAI_API_KEY")
+    text = open("logs/parsed_text_output_20241103_172435.txt", "r").read()
+    nodes = get_nodes(openai_api_key, "gpt-4o", text)
+    print(nodes)
