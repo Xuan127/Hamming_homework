@@ -1,0 +1,27 @@
+```json
+{
+  "nodes": [
+    {"id": "1", "label": "Asks if caller is an existing customer", "type": "question"},
+    {"id": "2", "label": "Asks for caller's name and physical address", "type": "question"},
+    {"id": "3", "label": "Inquires about air conditioning services", "type": "inquiry"},
+    {"id": "4", "label": "Inquires about types of air conditioning units offered", "type": "inquiry"},
+    {"id": "5", "label": "Inquires about pricing and maintenance services", "type": "inquiry"},
+    {"id": "6", "label": "Inquires about current promotions or discounts", "type": "inquiry"},
+    {"id": "7", "label": "Offers to have an agent provide information about air conditioning services", "type": "action"},
+    {"id": "8", "label": "Offers to have an agent provide information about types of air conditioning units", "type": "action"},
+    {"id": "9", "label": "Offers to have an agent provide information about pricing and maintenance services", "type": "action"},
+    {"id": "10", "label": "Offers to have an agent provide information about current promotions or discounts", "type": "action"}
+  ],
+  "edges": [
+    {"source_id": "1", "target_id": "2", "condition": "No"},
+    {"source_id": "2", "target_id": "3", "condition": "Caller inquires about air conditioning services"},
+    {"source_id": "2", "target_id": "4", "condition": "Caller inquires about types of air conditioning units offered"},
+    {"source_id": "2", "target_id": "5", "condition": "Caller inquires about pricing and maintenance services"},
+    {"source_id": "2", "target_id": "6", "condition": "Caller inquires about current promotions or discounts"},
+    {"source_id": "3", "target_id": "7", "condition": "Callee responds"},
+    {"source_id": "4", "target_id": "8", "condition": "Callee responds"},
+    {"source_id": "5", "target_id": "9", "condition": "Callee responds"},
+    {"source_id": "6", "target_id": "10", "condition": "Callee responds"}
+  ]
+}
+```

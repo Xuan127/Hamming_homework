@@ -1,3 +1,4 @@
+import streamlit as st
 from streamlit_agraph import agraph, Node, Edge, Config
 from pydantic import BaseModel
 from enum import Enum
@@ -28,8 +29,8 @@ class DecisionTree:
         self.edges_kwargs = {
 
         }
-        self.config = Config(width=500,
-            height=500,
+        self.config = Config(width=1750,
+            height=750,
             directed=True, 
             physics=False, 
             hierarchical={"enabled": True, "direction": "UD"},
@@ -40,6 +41,9 @@ class DecisionTree:
 
     def add_node(self, id, label):
         self.nodes.append(Node(id=id, label=label, size=25, shape="dot", color="red", **self.nodes_kwargs))
+
+    def add_inquiry_node(self, id, label):
+        self.nodes.append(Node(id=id, label=label, size=25, shape="dot", color="green", **self.nodes_kwargs))
 
     def add_decision_node(self, id, label):
         self.nodes.append(Node(id=id, label=label, size=25, shape="diamond", color="blue", **self.nodes_kwargs))
@@ -53,8 +57,30 @@ class DecisionTree:
     def get_edges_as_dict(self):
         return [{"source": edge.source, "target": edge.target, "label": edge.label} for edge in self.edges]
 
+    def wrap_label(self, label, max_length=20):
+        if label is None:
+            return ""
+        label = label.replace('\n', ' ')
+        words = label.split(' ')
+        wrapped_label = ''
+        current_length = 0
+        for word in words:
+            if current_length + len(word) + 1 > max_length:
+                wrapped_label += '\n' + word + ' '
+                current_length = len(word) + 1
+            else:
+                wrapped_label += word + ' '
+                current_length += len(word) + 1
+        return wrapped_label.strip()
+    
     def display(self):
-        agraph(nodes=self.nodes, edges=self.edges, config=self.config)
+        temp_nodes = self.nodes.copy()
+        for node in temp_nodes:
+            node.label = self.wrap_label(node.label)
+        temp_edges = self.edges.copy()
+        for edge in temp_edges:
+            edge.label = self.wrap_label(edge.label)
+        agraph(nodes=temp_nodes, edges=temp_edges, config=self.config)
 
 if __name__ == "__main__":
     tree = DecisionTree()
