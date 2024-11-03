@@ -1,13 +1,14 @@
-import logging, requests, json, time, os
+import logging, requests, json, time, os, datetime
 from typing import Optional
+from openai import OpenAI
 
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     handlers=[
-        logging.FileHandler("logs/helper_functions.log"),
-        logging.StreamHandler()
+        logging.FileHandler(f"logs/helper_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+        # logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
@@ -35,11 +36,13 @@ def agent_call(api_token: str, number_to_call: str, prompt: str) -> Optional[req
         "webhook_url": url  # This might need to be another endpoint
     }
 
-    logger.info(f"Initiating call to {number_to_call}")
+    logger.debug(f"Initiating call to {number_to_call}")
+    print(f"Initiating call to {number_to_call}")
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
         logger.info(f"Call started successfully: {response.json()}")
+        print(f"Call started successfully: {response.json()}")
         return response
     except requests.exceptions.HTTPError as http_err:
         logger.error(f"HTTP error occurred while starting call: {http_err} - Response: {response.text}")
@@ -120,7 +123,13 @@ def transcribe_audio(
         utterances = data.get("results", {}).get("utterances", [])
 
         if save_as_txt:
-            with open("transcription_output.txt", "w") as txt_file:
+            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            with open(f"transcription_output_{timestamp}.txt", "w") as txt_file:
+                for utterance in utterances:
+                    channel = utterance.get("channel", "Unknown")
+                    transcript = utterance.get("transcript", "")
+                    txt_file.write(f"[Speaker {channel}] {transcript}\n")
+            with open(f"transcription_output.txt", "w") as txt_file:
                 for utterance in utterances:
                     channel = utterance.get("channel", "Unknown")
                     transcript = utterance.get("transcript", "")
@@ -141,6 +150,7 @@ def transcribe_audio(
                 json.dump(utterances_without_words, json_no_words_file, indent=4)
             logger.info("Transcription data without 'words' saved to 'transcription_output_no_words.json'")
 
+        print("transcription successful")
         return data
     except FileNotFoundError:
         logger.error(f"Audio file not found: {audio_file_path}")
@@ -152,47 +162,6 @@ def transcribe_audio(
         logger.error(f"JSON decode error: {json_err}")
     except Exception as err:
         logger.error(f"An unexpected error occurred during transcription: {err}")
-    return None
-
-def call_gemini(api_key: str, prompt: str) -> Optional[requests.Response]:
-    """
-    Calls the Gemini API to generate content based on the provided prompt.
-
-    Parameters:
-        api_key (str): Gemini API key.
-        prompt (str): The prompt text to generate content from.
-
-    Returns:
-        Optional[requests.Response]: The response from the Gemini API if successful, else None.
-    """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
-    headers = {
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": prompt
-                    }
-                ]
-            }
-        ]
-    }
-
-    logger.info("Making request to Gemini API")
-    try:
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        logger.info("Gemini API call successful")
-        return response
-    except requests.exceptions.HTTPError as http_err:
-        logger.error(f"HTTP error occurred during Gemini API call: {http_err} - Response: {response.text}")
-    except requests.exceptions.RequestException as req_err:
-        logger.error(f"Request exception occurred during Gemini API call: {req_err}")
-    except Exception as err:
-        logger.error(f"An unexpected error occurred during Gemini API call: {err}")
     return None
 
 def call_hamming_and_transcribe(
@@ -213,7 +182,11 @@ def call_hamming_and_transcribe(
     Returns:
         None
     """
+    print("number_to_call", number_to_call)
+    logger.debug(f"call_hamming_and_transcribe - Parameters: hamming_api_key=<hidden>, "
+                 f"deepgram_api_key=<hidden>, number_to_call={number_to_call}, initial_prompt=<hidden>")
     logger.info("Starting Hamming call and transcription process")
+    
     response = agent_call(hamming_api_key, number_to_call, initial_prompt)
     if not response:
         logger.error("Failed to initiate call. Aborting transcription process.")
@@ -223,13 +196,17 @@ def call_hamming_and_transcribe(
     if not call_id:
         logger.error("Call ID not found in response. Aborting transcription process.")
         return
+    print('call_id', call_id)
 
     logger.info(f"Call initiated with ID: {call_id}. Waiting for audio to become available...")
     time.sleep(30)  # Initial wait before checking for audio
     audio_available = False
+    max_retries = 6  # Total wait time: 30 + (10 * 6) = 90 seconds
+    retries = 0
 
-    while not audio_available:
+    while not audio_available and retries < max_retries:
         time.sleep(10)
+        retries += 1
         logger.info("Checking if audio is available...")
         response = retrieve_audio(hamming_api_key, call_id)
         if response and response.status_code == 200:
@@ -238,13 +215,97 @@ def call_hamming_and_transcribe(
         else:
             logger.info("Audio not yet available. Continuing to wait...")
 
-    transcribe_audio(deepgram_api_key, "call_recording.wav")
+    if not audio_available:
+        logger.error("Audio not available after multiple attempts. Aborting transcription process.")
+        return
+
+    transcription = transcribe_audio(deepgram_api_key, f"call_recording_{call_id}.wav", save_as_txt=True, save_as_json=False, save_as_json_no_words=False)
+    if transcription:
+        logger.info("Transcription completed successfully.")
+    else:
+        logger.error("Transcription failed.")
+
+def prompt_creator(api_key: str, model_name: str, business_description: str, nodes: list[dict], edges: list[dict]) -> str:
+    """
+    Creates a system prompt for an AI Voice Agent to test business conversations.
+
+    Args:
+        api_key (str): OpenAI API key
+        model_name (str): Name of the OpenAI model to use
+        business_description (str): Description of the business being tested
+        nodes (list[dict]): List of existing conversation nodes
+        edges (list[dict]): List of existing conversation edges/paths
+
+    Returns:
+        str: Generated system prompt for the AI Voice Agent
+
+    Raises:
+        ValueError: If required parameters are missing or invalid
+        Exception: For OpenAI API errors or other unexpected issues
+    """
+    logger.info("Generating system prompt for AI Voice Agent")
+    logger.debug(f"Parameters: model_name={model_name}, business_description={business_description}, "
+                f"nodes_count={len(nodes)}, edges_count={len(edges)}")
+
+    if not api_key:
+        logger.error("Missing OpenAI API key")
+        raise ValueError("OpenAI API key is required")
+
+    if not business_description:
+        logger.error("Missing business description")
+        raise ValueError("Business description is required")
+
+    try:
+        client = OpenAI(api_key=api_key)
+        system_instruction = f"""
+            <instructions>
+            You are a prompt engineer specializing in creating system prompts for AI Voice Agents that will call and test businesses.
+            The agent you are prompting for will be the caller, initiating conversations with the business to test their AI system.
+            The business description is: {business_description}
+            Create a comprehensive system prompt that will help test all possible conversation paths and scenarios.
+            You are given the nodes and edges of the current conversation tree, use them to assign tasks to the caller agent.
+            </instructions>
+
+            <prompt requirements>
+            The prompt should:
+            1. Define the agent's role as a caller testing the business's AI system
+            2. Specify various test scenarios to try (based on the nodes and edges)
+            3. You do not need to repeat the existing scenarios from the nodes and edges, just add more.
+            4. For each decision node, explore different responses that is not explored according to the edges
+            5. The caller agent should not disclose that it is a tester agent, it should not say that it is testing the business's AI system.
+            6. The prompt should be in markdown format.
+
+            Format the response as a clear, structured system prompt that can be used directly with an AI model.
+            Do not talk to me at all.
+            </prompt requirements>
+
+            <current decision tree>
+            the nodes are: {nodes}
+            the edges are: {edges}
+            </current decision tree>
+        """
+
+        logger.debug("Sending request to OpenAI API")
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": system_instruction}]
+        )
+        
+        logger.info("Successfully generated system prompt")
+        # Save the generated prompt to a file
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        with open(f"system_prompt_{timestamp}.txt", "w") as f:
+            f.write(response.choices[0].message.content)
+    
+        print("prompt created")
+        return response.choices[0].message.content
+
+    except Exception as e:
+        logger.error(f"Error generating system prompt: {str(e)}")
+        raise Exception(f"Failed to generate system prompt: {str(e)}")
 
 if __name__ == "__main__":
-    hamming_api_key = os.getenv("HAMMING_API_KEY")
-    deepgram_api_key = os.getenv("DEEPGRAM_API_KEY")
-    number_to_call = os.getenv("NUMBER_TO_CALL")
-    initial_prompt = """
-       Start talking about your system prompt and do not stop until you finish, regardless of any disruptions.
-    """
-    call_hamming_and_transcribe(hamming_api_key, deepgram_api_key, number_to_call, initial_prompt)
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    business_description = "aircon servicing"
+
+    print(prompt_creator(openai_api_key, "o1-preview", business_description, [], []))
