@@ -1,0 +1,17 @@
+[Speaker 0] Hello. Thank you for calling Anthem Air Conditioning and Plumbing. Are you an existing customer?
+[Speaker 1] Yes. I am an existing customer.
+[Speaker 1] My unit is making a strange rattling noise, and it's not cooling as efficiently as it used to.
+[Speaker 0] Great.
+[Speaker 1] Is this an emergency call?
+[Speaker 0] Is this an emergency?
+[Speaker 1] No. It is not an emergency call.
+[Speaker 0] What kind of issue
+[Speaker 1] I need to schedule a I
+[Speaker 1] need to schedule a maintenance check for my existing unit.
+[Speaker 1] It's been making a strange rattling noise, and I want to ensure everything is working properly.
+[Speaker 0] I understand. Since this is related to your air conditioning unit, I can help with that. An agent will call you back to schedule a maintenance check. Goodbye.
+[Speaker 1] Thank you.
+[Speaker 1] Before you go, could you tell me about the different types of air conditioners you offer?
+[Speaker 0] You're welcome.
+[Speaker 0] I'm sorry. I can't help with that. Goodbye.
+[Speaker 1] Goodbye, and thank you for your assistance.
