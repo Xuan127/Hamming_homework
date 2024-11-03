@@ -182,7 +182,6 @@ def call_hamming_and_transcribe(
     Returns:
         None
     """
-    print("number_to_call", number_to_call)
     logger.debug(f"call_hamming_and_transcribe - Parameters: hamming_api_key=<hidden>, "
                  f"deepgram_api_key=<hidden>, number_to_call={number_to_call}, initial_prompt=<hidden>")
     logger.info("Starting Hamming call and transcription process")
@@ -196,32 +195,35 @@ def call_hamming_and_transcribe(
     if not call_id:
         logger.error("Call ID not found in response. Aborting transcription process.")
         return
-    print('call_id', call_id)
 
     logger.info(f"Call initiated with ID: {call_id}. Waiting for audio to become available...")
     time.sleep(30)  # Initial wait before checking for audio
     audio_available = False
-    max_retries = 6  # Total wait time: 30 + (10 * 6) = 90 seconds
+    max_retries = 600  # Total wait time: 30 + (10 * 600) = 6300 seconds
     retries = 0
 
     while not audio_available and retries < max_retries:
         time.sleep(10)
         retries += 1
         logger.info("Checking if audio is available...")
+        print("Checking if audio is available...")
         response = retrieve_audio(hamming_api_key, call_id)
         if response and response.status_code == 200:
             audio_available = True
             logger.info("Audio is now available for transcription.")
+            print("Audio is now available for transcription.")
         else:
             logger.info("Audio not yet available. Continuing to wait...")
+            print("Audio not yet available. Continuing to wait...")
 
     if not audio_available:
         logger.error("Audio not available after multiple attempts. Aborting transcription process.")
         return
 
-    transcription = transcribe_audio(deepgram_api_key, f"call_recording_{call_id}.wav", save_as_txt=True, save_as_json=False, save_as_json_no_words=False)
+    transcription = transcribe_audio(deepgram_api_key, f"call_recording.wav", save_as_txt=True, save_as_json=False, save_as_json_no_words=False)
     if transcription:
         logger.info("Transcription completed successfully.")
+        print("Transcription completed successfully.")
     else:
         logger.error("Transcription failed.")
 
@@ -244,6 +246,7 @@ def prompt_creator(api_key: str, model_name: str, business_description: str, nod
         Exception: For OpenAI API errors or other unexpected issues
     """
     logger.info("Generating system prompt for AI Voice Agent")
+    print("Generating system prompt for AI Voice Agent")
     logger.debug(f"Parameters: model_name={model_name}, business_description={business_description}, "
                 f"nodes_count={len(nodes)}, edges_count={len(edges)}")
 
